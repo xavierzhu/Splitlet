@@ -1,6 +1,92 @@
 # Splitlet
 
-A tiny Windows background tool that moves the active window into a custom left or right screen region.
+Splitlet is a tiny Windows tray app that moves the active window into custom left and right screen regions.
+
+It is built for ultrawide monitors, multi-monitor desks, and anyone who wants a lighter alternative to a full window manager.
+
+[Download the latest release](https://github.com/xavierzhu/Splitlet/releases/latest)
+
+## Features
+
+- Move the active window to a custom left or right region with global hotkeys.
+- Configure split ratio, gap, taskbar respect, zone locking, and auto start.
+- Set split behavior per monitor from the tray settings window.
+- Restore a snapped window to its previous placement.
+- Pause or exit from the tray menu.
+- Native Win32 app with local configuration only.
+
+## Download
+
+1. Open the [latest release](https://github.com/xavierzhu/Splitlet/releases/latest).
+2. Download `Splitlet-v*-windows-x64.zip`.
+3. Extract the zip.
+4. Run `Splitlet.exe`.
+
+If `config.ini` is missing, Splitlet creates a default one next to the executable.
+
+## Default Hotkeys
+
+```text
+WIN+ALT+LEFT   Move active window to the left region
+WIN+ALT+RIGHT  Move active window to the right region
+WIN+ALT+UP     Restore the window to its last saved position and unlock it
+WIN+ALT+F5     Reload config.ini
+WIN+ALT+Q      Exit
+```
+
+Some elevated windows can only be moved when `Splitlet.exe` is also run as administrator.
+
+## Tray Menu
+
+Right-click the Splitlet tray icon to:
+
+- Open settings.
+- Pause or resume window management.
+- Exit Splitlet.
+
+The settings window lets you choose a display and edit that display's split ratio, gap, and enabled state. It also includes global toggles for taskbar respect, zone locking, and auto start.
+
+## Configuration
+
+Splitlet stores settings in `config.ini` next to `Splitlet.exe`.
+
+```ini
+left_ratio=0.60
+gap=8
+respect_taskbar=true
+lock_zones=true
+auto_start=false
+
+hotkey_left=WIN+ALT+LEFT
+hotkey_right=WIN+ALT+RIGHT
+hotkey_restore=WIN+ALT+UP
+hotkey_reload=WIN+ALT+F5
+hotkey_exit=WIN+ALT+Q
+
+[monitor:\\.\DISPLAY1]
+enabled=true
+left_ratio=0.60
+gap=8
+```
+
+Notes:
+
+- `left_ratio` is clamped to `0.10` through `0.90`.
+- `gap` is clamped to `0` through `200` pixels.
+- `respect_taskbar=true` uses the monitor work area and avoids the taskbar.
+- `lock_zones=true` keeps snapped windows inside their assigned region, including when the maximize button is clicked.
+- `auto_start=true` starts Splitlet automatically when the current Windows user signs in.
+- If a display has `enabled=false`, split hotkeys do nothing for windows on that display.
+
+## Privacy
+
+Splitlet is designed to stay local:
+
+- No telemetry.
+- No account.
+- No cloud sync.
+- No window title or app content collection.
+- Configuration is stored locally in `config.ini`.
 
 ## Build
 
@@ -26,53 +112,14 @@ cmake --build build-small --config Release
 
 This makes `Splitlet.exe` much smaller, but it requires the MinGW runtime DLLs such as `libgcc_s_seh-1.dll` and `libstdc++-6.dll` to be available on the target machine.
 
-## Usage
+## Roadmap
 
-Place `config.ini` next to `Splitlet.exe`, then run the exe. The program has no UI and stays in the background.
+- Layout presets.
+- Hotkey editing in the settings window.
+- Import and export settings.
+- Installer package.
+- Automatic update checks.
 
-Default hotkeys:
+## Contributing
 
-```text
-WIN+ALT+LEFT   Move active window to the left region
-WIN+ALT+RIGHT  Move active window to the right region
-WIN+ALT+UP     Restore the window to its last saved position and unlock it
-WIN+ALT+F5     Reload config.ini
-WIN+ALT+Q      Exit
-```
-
-If `config.ini` is missing, the program creates a default one in the exe directory.
-
-Right-click the Splitlet tray icon to open settings, pause/resume window management, or exit the program. The tray menu is in English, and the settings window opens in the center of the screen. In settings, choose a display to edit that display's split ratio, gap, and split enable state.
-
-## Configuration
-
-```ini
-left_ratio=0.60
-gap=8
-respect_taskbar=true
-lock_zones=true
-auto_start=false
-
-hotkey_left=WIN+ALT+LEFT
-hotkey_right=WIN+ALT+RIGHT
-hotkey_restore=WIN+ALT+UP
-hotkey_reload=WIN+ALT+F5
-hotkey_exit=WIN+ALT+Q
-
-[monitor:\\.\DISPLAY1]
-enabled=true
-left_ratio=0.60
-gap=8
-```
-
-Notes:
-
-- `left_ratio` is clamped to `0.10` through `0.90`.
-- `gap` is the pixel space between the two regions.
-- `respect_taskbar=true` uses the monitor work area, avoiding the taskbar.
-- `lock_zones=true` keeps snapped windows inside their assigned region, including when the maximize button is clicked.
-- `auto_start=true` starts Splitlet automatically when the current Windows user signs in.
-- The tray Settings window can choose a display, edit that display's `enabled`, `left_ratio`, and `gap`, and toggle global `respect_taskbar`, `lock_zones`, and `auto_start`.
-- If a display has `enabled=false`, split hotkeys do nothing for windows on that display.
-- Pause temporarily disables Splitlet window actions without exiting the tray program.
-- Some elevated windows can only be moved when `Splitlet.exe` is also run as administrator.
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) before opening larger changes.

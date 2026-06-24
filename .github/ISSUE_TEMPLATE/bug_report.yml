@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a problem with Splitlet.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the issue clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run Splitlet
+        2. Press WIN+ALT+LEFT
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        Splitlet version:
+        Windows version:
+        Monitor count:
+        Display scaling:
+    validations:
+      required: true
