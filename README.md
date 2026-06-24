@@ -122,6 +122,10 @@ This makes `Splitlet.exe` much smaller, but it requires the MinGW runtime DLLs s
 - Installer package.
 - Automatic update checks.
 
+## License
+
+Splitlet is licensed under the [MIT License](LICENSE).
+
 ## Contributing
 
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) before opening larger changes.
