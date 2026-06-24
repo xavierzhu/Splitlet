@@ -1,5 +1,7 @@
 # Splitlet
 
+[![Build](https://github.com/xavierzhu/Splitlet/actions/workflows/build.yml/badge.svg)](https://github.com/xavierzhu/Splitlet/actions/workflows/build.yml)
+
 Splitlet is a tiny Windows tray app that moves the active window into custom left and right screen regions.
 
 It is built for ultrawide monitors, multi-monitor desks, and anyone who wants a lighter alternative to a full window manager.
