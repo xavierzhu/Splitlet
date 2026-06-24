@@ -73,9 +73,23 @@ bool g_enforcingZone = false;
 bool g_paused = false;
 UINT g_taskbarCreatedMessage = 0;
 HINSTANCE g_instance = nullptr;
+HFONT g_uiFont = nullptr;
 
 void InstallLocationHook();
 void UninstallLocationHook();
+
+HFONT GetUiFont() {
+    if (g_uiFont) {
+        return g_uiFont;
+    }
+
+    NONCLIENTMETRICSW metrics{};
+    metrics.cbSize = sizeof(metrics);
+    if (SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0)) {
+        g_uiFont = CreateFontIndirectW(&metrics.lfMessageFont);
+    }
+    return g_uiFont;
+}
 
 std::wstring GetExeDir() {
     wchar_t path[MAX_PATH]{};
@@ -959,6 +973,40 @@ bool IsCheckboxChecked(HWND hwnd, UINT id) {
     return SendDlgItemMessageW(hwnd, id, BM_GETCHECK, 0, 0) == BST_CHECKED;
 }
 
+HWND CreateUiControl(
+    DWORD exStyle,
+    const wchar_t* className,
+    const wchar_t* text,
+    DWORD style,
+    int x,
+    int y,
+    int width,
+    int height,
+    HWND parent,
+    UINT id = 0
+) {
+    HWND control = CreateWindowExW(
+        exStyle,
+        className,
+        text,
+        WS_CHILD | WS_VISIBLE | style,
+        x,
+        y,
+        width,
+        height,
+        parent,
+        id ? reinterpret_cast<HMENU>(id) : nullptr,
+        g_instance,
+        nullptr
+    );
+
+    HFONT font = GetUiFont();
+    if (control && font) {
+        SendMessageW(control, WM_SETFONT, reinterpret_cast<WPARAM>(font), TRUE);
+    }
+    return control;
+}
+
 void LoadMonitorControls(HWND hwnd, const MonitorEntry& monitor) {
     SetWindowTextW(GetDlgItem(hwnd, ID_SETTINGS_LEFT_RATIO), FormatLeftRatio(monitor.settings.leftRatio).c_str());
     SetWindowTextW(GetDlgItem(hwnd, ID_SETTINGS_GAP), std::to_wstring(monitor.settings.gap).c_str());
@@ -985,56 +1033,66 @@ bool ReadMonitorControls(HWND hwnd, MonitorEntry& monitor) {
 
 LRESULT CALLBACK SettingsDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
+    case WM_CTLCOLORSTATIC:
+    case WM_CTLCOLORBTN:
+        SetBkMode(reinterpret_cast<HDC>(wParam), TRANSPARENT);
+        return reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_WINDOW));
     case WM_CREATE: {
         auto* state = reinterpret_cast<SettingsDialogState*>(
             reinterpret_cast<CREATESTRUCTW*>(lParam)->lpCreateParams
         );
         SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
 
-        CreateWindowExW(0, L"STATIC", L"Display", WS_CHILD | WS_VISIBLE,
-            18, 20, 112, 20, hwnd, nullptr, g_instance, nullptr);
-        HWND monitorCombo = CreateWindowExW(0, L"COMBOBOX", L"",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | WS_VSCROLL,
-            138, 18, 246, 180, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_MONITOR), g_instance, nullptr);
+        CreateUiControl(0, L"STATIC", L"Display", 0,
+            22, 22, 90, 20, hwnd);
+        HWND monitorCombo = CreateUiControl(0, L"COMBOBOX", L"",
+            WS_TABSTOP | CBS_DROPDOWNLIST | WS_VSCROLL,
+            118, 18, 328, 160, hwnd, ID_SETTINGS_MONITOR);
         for (const MonitorEntry& monitor : state->monitors) {
             SendMessageW(monitorCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(monitor.label.c_str()));
         }
         SendMessageW(monitorCombo, CB_SETCURSEL, static_cast<WPARAM>(state->selectedMonitor), 0);
 
-        CreateWindowExW(0, L"BUTTON", L"Enable Split on This Display",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-            18, 56, 220, 22, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_MONITOR_ENABLED), g_instance, nullptr);
+        CreateUiControl(0, L"BUTTON", L"Display Settings", BS_GROUPBOX,
+            16, 58, 438, 142, hwnd);
+        CreateUiControl(0, L"BUTTON", L"Enable split on this display",
+            WS_TABSTOP | BS_AUTOCHECKBOX,
+            32, 86, 260, 22, hwnd, ID_SETTINGS_MONITOR_ENABLED);
 
-        CreateWindowExW(0, L"STATIC", L"Left Ratio", WS_CHILD | WS_VISIBLE,
-            18, 90, 112, 20, hwnd, nullptr, g_instance, nullptr);
-        CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-            138, 88, 160, 24, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_LEFT_RATIO), g_instance, nullptr);
-        CreateWindowExW(0, L"STATIC", L"0.10 - 0.90", WS_CHILD | WS_VISIBLE,
-            306, 92, 78, 20, hwnd, nullptr, g_instance, nullptr);
+        CreateUiControl(0, L"STATIC", L"Left ratio", 0,
+            32, 122, 92, 20, hwnd);
+        CreateUiControl(WS_EX_CLIENTEDGE, L"EDIT", L"",
+            WS_TABSTOP | ES_AUTOHSCROLL,
+            138, 118, 92, 24, hwnd, ID_SETTINGS_LEFT_RATIO);
+        CreateUiControl(0, L"STATIC", L"0.10 to 0.90", 0,
+            246, 122, 110, 20, hwnd);
 
-        CreateWindowExW(0, L"STATIC", L"Gap", WS_CHILD | WS_VISIBLE,
-            18, 126, 112, 20, hwnd, nullptr, g_instance, nullptr);
-        CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
-            138, 124, 160, 24, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_GAP), g_instance, nullptr);
-        CreateWindowExW(0, L"STATIC", L"0 - 200 px", WS_CHILD | WS_VISIBLE,
-            306, 128, 78, 20, hwnd, nullptr, g_instance, nullptr);
+        CreateUiControl(0, L"STATIC", L"Gap", 0,
+            32, 158, 92, 20, hwnd);
+        CreateUiControl(WS_EX_CLIENTEDGE, L"EDIT", L"",
+            WS_TABSTOP | ES_AUTOHSCROLL,
+            138, 154, 92, 24, hwnd, ID_SETTINGS_GAP);
+        CreateUiControl(0, L"STATIC", L"0 to 200 px", 0,
+            246, 158, 110, 20, hwnd);
 
-        CreateWindowExW(0, L"BUTTON", L"Respect Taskbar",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-            18, 164, 180, 22, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_RESPECT_TASKBAR), g_instance, nullptr);
-        CreateWindowExW(0, L"BUTTON", L"Lock Zones",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-            18, 192, 180, 22, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_LOCK_ZONES), g_instance, nullptr);
-        CreateWindowExW(0, L"BUTTON", L"Start with Windows",
-            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-            18, 220, 180, 22, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_AUTO_START), g_instance, nullptr);
+        CreateUiControl(0, L"BUTTON", L"General", BS_GROUPBOX,
+            16, 214, 438, 112, hwnd);
+        CreateUiControl(0, L"BUTTON", L"Respect taskbar work area",
+            WS_TABSTOP | BS_AUTOCHECKBOX,
+            32, 242, 220, 22, hwnd, ID_SETTINGS_RESPECT_TASKBAR);
+        CreateUiControl(0, L"BUTTON", L"Keep snapped windows inside zones",
+            WS_TABSTOP | BS_AUTOCHECKBOX,
+            32, 270, 260, 22, hwnd, ID_SETTINGS_LOCK_ZONES);
+        CreateUiControl(0, L"BUTTON", L"Start Splitlet with Windows",
+            WS_TABSTOP | BS_AUTOCHECKBOX,
+            32, 298, 220, 22, hwnd, ID_SETTINGS_AUTO_START);
 
-        CreateWindowExW(0, L"BUTTON", L"OK", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
-            218, 258, 80, 26, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_OK), g_instance, nullptr);
-        CreateWindowExW(0, L"BUTTON", L"Cancel", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-            310, 258, 80, 26, hwnd, reinterpret_cast<HMENU>(ID_SETTINGS_CANCEL), g_instance, nullptr);
+        CreateUiControl(0, L"BUTTON", L"OK",
+            WS_TABSTOP | BS_DEFPUSHBUTTON,
+            286, 344, 78, 28, hwnd, ID_SETTINGS_OK);
+        CreateUiControl(0, L"BUTTON", L"Cancel",
+            WS_TABSTOP,
+            376, 344, 78, 28, hwnd, ID_SETTINGS_CANCEL);
 
         if (!state->monitors.empty()) {
             LoadMonitorControls(hwnd, state->monitors[static_cast<size_t>(state->selectedMonitor)]);
@@ -1130,8 +1188,8 @@ bool ShowSettingsDialog(HWND owner, Config& config) {
         state.monitors.push_back(fallback);
     }
 
-    const int width = 426;
-    const int height = 338;
+    const int width = 486;
+    const int height = 430;
     POINT cursor{};
     GetCursorPos(&cursor);
     HMONITOR monitor = MonitorFromPoint(cursor, MONITOR_DEFAULTTONEAREST);

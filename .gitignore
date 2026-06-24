@@ -1,8 +1,7 @@
-build/
+build*/
 *.log
 *.exe
 *.obj
 *.pdb
 *.ilk
 *.user
-

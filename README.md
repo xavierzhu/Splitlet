@@ -4,6 +4,8 @@ A tiny Windows background tool that moves the active window into a custom left o
 
 ## Build
 
+Default build creates a self-contained executable with the MinGW runtime statically linked:
+
 ```powershell
 cmake -S . -B build -G "MinGW Makefiles"
 cmake --build build --config Release
@@ -14,6 +16,15 @@ The executable is generated at:
 ```text
 build\Splitlet.exe
 ```
+
+For a smaller executable, build without static MinGW runtime linking:
+
+```powershell
+cmake -S . -B build-small -G "MinGW Makefiles" -DSPLITLET_STATIC_RUNTIME=OFF
+cmake --build build-small --config Release
+```
+
+This makes `Splitlet.exe` much smaller, but it requires the MinGW runtime DLLs such as `libgcc_s_seh-1.dll` and `libstdc++-6.dll` to be available on the target machine.
 
 ## Usage
 
