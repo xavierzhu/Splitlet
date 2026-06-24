@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Splitlet icon">
+  <defs>
+    <linearGradient id="frame" x1="32" y1="28" x2="224" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F6BFF"/>
+      <stop offset="1" stop-color="#13B8A6"/>
+    </linearGradient>
+    <linearGradient id="leftPane" x1="56" y1="64" x2="114" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EAF1FF"/>
+      <stop offset="1" stop-color="#BED2FF"/>
+    </linearGradient>
+    <linearGradient id="rightPane" x1="140" y1="64" x2="200" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#DDFBF4"/>
+      <stop offset="1" stop-color="#A8EFE2"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="44" fill="url(#frame)"/>
+  <rect x="46" y="48" width="164" height="160" rx="18" fill="#0E1733" opacity="0.28"/>
+  <rect x="54" y="56" width="70" height="144" rx="12" fill="url(#leftPane)"/>
+  <rect x="136" y="56" width="66" height="144" rx="12" fill="url(#rightPane)"/>
+  <rect x="120" y="54" width="16" height="148" rx="8" fill="#FFFFFF"/>
+  <rect x="84" y="83" width="22" height="8" rx="4" fill="#2F6BFF" opacity="0.72"/>
+  <rect x="152" y="83" width="28" height="8" rx="4" fill="#0B9F91" opacity="0.72"/>
+</svg>
