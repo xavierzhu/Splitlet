@@ -8,6 +8,20 @@ It is built for ultrawide monitors, multi-monitor desks, and anyone who wants a 
 
 [Download the latest release](https://github.com/xavierzhu/Splitlet/releases/latest)
 
+## Tiny by Design
+
+Splitlet is intentionally small:
+
+| Metric | Current value |
+| --- | ---: |
+| Release zip | 413 KiB |
+| Self-contained `Splitlet.exe` | 1.10 MiB |
+| Files in the release zip | 3 |
+| Private memory after launch | ~1.6 MiB |
+| Working set after launch | ~7.6 MiB |
+
+Measured from the `v0.1.0` Windows x64 release build on Windows. Runtime memory can vary slightly by system.
+
 ## Features
 
 - Move the active window to a custom left or right region with global hotkeys.
