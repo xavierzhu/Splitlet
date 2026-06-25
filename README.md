@@ -60,7 +60,7 @@ Right-click the Splitlet tray icon to:
 - Pause or resume window management.
 - Exit Splitlet.
 
-The settings window lets you choose a display and edit that display's split ratio, gap, and enabled state. It also includes global toggles for taskbar respect, zone locking, and auto start.
+The settings window lets you choose a display and edit that display's split ratio, gap, and enabled state. It also includes global toggles for taskbar respect, zone locking, and auto start, plus a button to open `config.ini` in the default text editor.
 
 ## Configuration
 

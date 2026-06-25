@@ -35,6 +35,7 @@ constexpr UINT ID_SETTINGS_RESPECT_TASKBAR = 2003;
 constexpr UINT ID_SETTINGS_LOCK_ZONES = 2004;
 constexpr UINT ID_SETTINGS_AUTO_START = 2005;
 constexpr UINT ID_SETTINGS_MONITOR_ENABLED = 2006;
+constexpr UINT ID_SETTINGS_OPEN_CONFIG = 2007;
 constexpr UINT ID_SETTINGS_OK = IDOK;
 constexpr UINT ID_SETTINGS_CANCEL = IDCANCEL;
 
@@ -1031,6 +1032,16 @@ bool ReadMonitorControls(HWND hwnd, MonitorEntry& monitor) {
     return true;
 }
 
+void OpenConfigFile(HWND hwnd) {
+    const std::wstring path = GetConfigPath();
+    WriteDefaultConfigIfMissing(path);
+
+    HINSTANCE result = ShellExecuteW(hwnd, L"open", path.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+    if (reinterpret_cast<INT_PTR>(result) <= 32) {
+        MessageBoxW(hwnd, L"Could not open config.ini with the default editor.", L"Splitlet", MB_OK | MB_ICONWARNING);
+    }
+}
+
 LRESULT CALLBACK SettingsDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
     case WM_CTLCOLORSTATIC:
@@ -1087,6 +1098,9 @@ LRESULT CALLBACK SettingsDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
             WS_TABSTOP | BS_AUTOCHECKBOX,
             32, 298, 220, 22, hwnd, ID_SETTINGS_AUTO_START);
 
+        CreateUiControl(0, L"BUTTON", L"Open Config File",
+            WS_TABSTOP,
+            16, 344, 132, 28, hwnd, ID_SETTINGS_OPEN_CONFIG);
         CreateUiControl(0, L"BUTTON", L"OK",
             WS_TABSTOP | BS_DEFPUSHBUTTON,
             286, 344, 78, 28, hwnd, ID_SETTINGS_OK);
@@ -1150,6 +1164,10 @@ LRESULT CALLBACK SettingsDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
         }
         if (LOWORD(wParam) == ID_SETTINGS_CANCEL) {
             DestroyWindow(hwnd);
+            return 0;
+        }
+        if (LOWORD(wParam) == ID_SETTINGS_OPEN_CONFIG) {
+            OpenConfigFile(hwnd);
             return 0;
         }
         break;
