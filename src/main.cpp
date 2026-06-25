@@ -1259,17 +1259,20 @@ void ShowTrayMenu(HWND hwnd) {
     DestroyMenu(menu);
 }
 
+void OpenSettings(HWND hwnd) {
+    Config nextConfig = g_config;
+    if (ShowSettingsDialog(hwnd, nextConfig)) {
+        g_config = nextConfig;
+        g_lockedZones.clear();
+        RefreshConfig(hwnd, true);
+    }
+}
+
 void HandleTrayCommand(HWND hwnd, UINT command) {
     switch (command) {
-    case ID_TRAY_SETTINGS: {
-        Config nextConfig = g_config;
-        if (ShowSettingsDialog(hwnd, nextConfig)) {
-            g_config = nextConfig;
-            g_lockedZones.clear();
-            RefreshConfig(hwnd, true);
-        }
+    case ID_TRAY_SETTINGS:
+        OpenSettings(hwnd);
         break;
-    }
     case ID_TRAY_PAUSE:
         g_paused = !g_paused;
         if (g_paused) {
@@ -1297,7 +1300,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
         HandleTrayCommand(hwnd, LOWORD(wParam));
         return 0;
     case WM_TRAYICON:
-        if (LOWORD(lParam) == WM_RBUTTONUP || LOWORD(lParam) == WM_CONTEXTMENU) {
+        if (LOWORD(lParam) == WM_LBUTTONUP || LOWORD(lParam) == WM_LBUTTONDBLCLK) {
+            OpenSettings(hwnd);
+        } else if (LOWORD(lParam) == WM_RBUTTONUP || LOWORD(lParam) == WM_CONTEXTMENU) {
             ShowTrayMenu(hwnd);
         }
         return 0;
