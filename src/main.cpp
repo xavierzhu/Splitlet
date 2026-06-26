@@ -75,6 +75,7 @@ bool g_paused = false;
 UINT g_taskbarCreatedMessage = 0;
 HINSTANCE g_instance = nullptr;
 HFONT g_uiFont = nullptr;
+HWND g_settingsDialog = nullptr;
 
 void InstallLocationHook();
 void UninstallLocationHook();
@@ -1174,6 +1175,11 @@ LRESULT CALLBACK SettingsDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
     case WM_CLOSE:
         DestroyWindow(hwnd);
         return 0;
+    case WM_DESTROY:
+        if (g_settingsDialog == hwnd) {
+            g_settingsDialog = nullptr;
+        }
+        break;
     default:
         break;
     }
@@ -1183,6 +1189,13 @@ LRESULT CALLBACK SettingsDialogProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 
 bool ShowSettingsDialog(HWND owner, Config& config) {
     constexpr const wchar_t* className = L"SplitletSettingsDialog";
+    if (g_settingsDialog && IsWindow(g_settingsDialog)) {
+        ShowWindow(g_settingsDialog, SW_SHOWNORMAL);
+        BringWindowToTop(g_settingsDialog);
+        SetForegroundWindow(g_settingsDialog);
+        return false;
+    }
+
     static bool registered = false;
     if (!registered) {
         WNDCLASSW wc{};
@@ -1237,6 +1250,7 @@ bool ShowSettingsDialog(HWND owner, Config& config) {
         return false;
     }
 
+    g_settingsDialog = dialog;
     EnableWindow(owner, FALSE);
     ShowWindow(dialog, SW_SHOW);
     UpdateWindow(dialog);
