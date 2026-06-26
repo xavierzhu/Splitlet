@@ -1232,7 +1232,7 @@ bool ShowSettingsDialog(HWND owner, Config& config) {
     const int y = work.top + ((work.bottom - work.top - height) / 2);
 
     HWND dialog = CreateWindowExW(
-        WS_EX_DLGMODALFRAME | WS_EX_TOPMOST,
+        WS_EX_DLGMODALFRAME,
         className,
         L"Splitlet Settings",
         WS_CAPTION | WS_SYSMENU | WS_POPUP,
